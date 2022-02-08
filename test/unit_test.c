@@ -4,6 +4,9 @@
 #include <float.h>  // For DBL_EPSILON
 #include <math.h>
 #include <stdio.h>  // For printf
+#include "cy_pdl.h"
+#include "cyhal.h"
+#include "cybsp.h"
 
 #include "mjson.h"
 
@@ -16,7 +19,7 @@ static int s_num_errors = 0;
     if (!(expr)) {                                           \
       s_num_errors++;                                        \
       printf("FAIL %s:%d: %s\n", __FILE__, __LINE__, #expr); \
-      exit(1);                                               \
+      CY_ASSERT(0);                                          \
     }                                                        \
   } while (0)
 
@@ -508,18 +511,18 @@ static void test_printf(void) {
     free(s);
   }
 
-  {
-    char *s = NULL;
-    const char *fmt = "{\"a\":%d, \"b\":%u, \"c\":%ld, \"d\":%lu, \"e\":%M}";
-    ASSERT(mjson_printf(&mjson_print_dynamic_buf, &s, fmt, -1, 3456789012,
-                        (long) -1, (unsigned long) 3456789012, f1, 1234) == 60);
-    ASSERT(s != NULL);
-    str =
-        "{\"a\":-1, \"b\":3456789012, \"c\":-1, \"d\":3456789012, "
-        "\"e\":[1234]}";
-    ASSERT(memcmp(s, str, 60) == 0);
-    free(s);
-  }
+//  {
+//    char *s = NULL;
+//    const char *fmt = "{\"a\":%d, \"b\":%u, \"c\":%ld, \"d\":%lu, \"e\":%M}";
+//    ASSERT(mjson_printf(&mjson_print_dynamic_buf, &s, fmt, -1, 3456789012,
+//                        (long) -1, (unsigned long) 3456789012, f1, 1234) == 60);
+//    ASSERT(s != NULL);
+//    str =
+//        "{\"a\":-1, \"b\":3456789012, \"c\":-1, \"d\":3456789012, "
+//        "\"e\":[1234]}";
+//    ASSERT(memcmp(s, str, 60) == 0);
+//    free(s);
+//  }
 
   {
     char *s = NULL;
@@ -752,7 +755,8 @@ static void test_pretty(void) {
       "{\n  \"a\": {\n    \"b\": 2\n  },\n  \"c\": {}\n}",
       "{\"a\":{\"b\":2},\"c\":{}}",
   };
-
+  /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
+      printf("\x1b[2J\x1b[;H");
   for (i = 0; i < sizeof(tests) / sizeof(tests[0]); i += 3) {
     char buf[512];
     struct mjson_fixedbuf fb = {buf, sizeof(buf), 0};
@@ -761,7 +765,7 @@ static void test_pretty(void) {
            0);
     ASSERT(fb.len == (int) strlen(tests[i + 1]));
     ASSERT(strncmp(fb.ptr, tests[i + 1], (size_t) fb.len) == 0);
-    // printf("==> %s\n", buf);
+    printf("==> %s\n", buf);
 
     // Terse print
     fb.len = 0;
@@ -769,7 +773,7 @@ static void test_pretty(void) {
            0);
     ASSERT(fb.len == (int) strlen(tests[i + 2]));
     ASSERT(strncmp(fb.ptr, tests[i + 2], (size_t) fb.len) == 0);
-    // printf("--> %s\n", buf);
+    printf("--> %s\n", buf);
   }
 }
 
@@ -864,21 +868,21 @@ static void test_multiple_contexts(void) {
   free(r2);
 }
 
-int main() {
-  test_multiple_contexts();
-  test_next();
-  test_printf();
-  test_cb();
-  test_find();
-  test_get_number();
-  test_get_bool();
-  test_get_string();
-  test_print();
-  test_rpc();
-  test_merge();
+void mjson_test() {
+//  test_multiple_contexts();
+//  test_next();
+//  test_printf();
+//  test_cb();
+//  test_find();
+//  test_get_number();
+//  test_get_bool();
+//  test_get_string();
+//  test_print();
+//  test_rpc();
+//  test_merge();
   test_pretty();
-  test_globmatch();
-  printf("%s. Total tests: %d, failed: %d\n",
-         s_num_errors ? "FAILURE" : "SUCCESS", s_num_tests, s_num_errors);
-  return s_num_errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+//  test_globmatch();
+//  printf("%s. Total tests: %d, failed: %d\n",
+//         s_num_errors ? "FAILURE" : "SUCCESS", s_num_tests, s_num_errors);
+//  return s_num_errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
